@@ -4,11 +4,39 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class Parser {
     public Parser() {
 
+    }
+
+    public void getURL(String[] keywords) throws IOException{
+        //Borrowed from user BalusC from Stack Overflow
+        String google = "http://www.google.com/search?q=";
+        String charSet = "UTF-8";
+        StringBuilder search = new StringBuilder();
+        for (int i = 0; i < keywords.length; i++) {
+            keywords[i] += " ";
+            search.append(keywords[i]);
+        }
+        Elements links = Jsoup.connect(google + URLEncoder.encode(search.toString(), charSet)).userAgent("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)").get().select(".g>.r>a");
+        boolean acceptable;
+
+        for (Element link: links) {
+            String title = link.text();
+            String url = link.absUrl("href");
+            url = URLDecoder.decode(url.substring(url.indexOf('=') + 1, url.indexOf('&')), "UTF-8");
+
+            if(!url.startsWith("http")){
+                continue;
+            }
+
+            System.out.println("Title: " + title);
+            System.out.println("URL: " + url);
+        }
     }
 
     public void getInfo() throws IOException {
